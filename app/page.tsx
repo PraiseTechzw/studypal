@@ -1,13 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, BookOpen, Brain, CheckCircle, Laptop, Sparkles, Star, Zap, Users, Clock } from "lucide-react"
+import { ArrowRight, BookOpen, Brain, CheckCircle, Laptop, Sparkles, Star, Zap, Users, Clock, Menu, X, ChevronDown, ChevronUp, Play, Shield, Lock, Zap as ZapIcon, Target, Award, BookOpen as BookOpenIcon, Brain as BrainIcon, Users as UsersIcon, Clock as ClockIcon, BarChart3, FileText, Globe, Calendar, Hash, Settings, Lightbulb } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { useRef } from "react"
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
+import { useRef, useState } from "react"
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeFeature, setActiveFeature] = useState<number | null>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"]
@@ -16,10 +18,89 @@ export default function LandingPage() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
 
+  const features = [
+    {
+      icon: BrainIcon,
+      title: "AI-Powered Organization",
+      description: "Smart categorization and tagging of your study materials",
+      details: "Our AI analyzes your study materials and automatically organizes them into relevant categories, making it easy to find what you need when you need it."
+    },
+    {
+      icon: UsersIcon,
+      title: "Collaborative Learning",
+      description: "Study groups and shared resources for better learning",
+      details: "Create study groups, share resources, and collaborate with classmates in real-time. Perfect for group projects and exam preparation."
+    },
+    {
+      icon: ClockIcon,
+      title: "Study Analytics",
+      description: "Track your progress and optimize your study habits",
+      details: "Get detailed insights into your study patterns, track your progress, and receive personalized recommendations to improve your learning efficiency."
+    }
+  ]
+
   return (
     <div ref={containerRef} className="flex flex-col min-h-screen bg-white">
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            className="fixed inset-y-0 right-0 w-64 bg-white shadow-xl z-50 p-6"
+          >
+            <div className="flex justify-between items-center mb-8">
+              <span className="text-xl font-bold text-[#319795]">StudPal</span>
+              <button onClick={() => setIsMenuOpen(false)}>
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <nav className="space-y-4">
+              <Link href="#features" className="block py-2 text-gray-600 hover:text-[#319795]">Features</Link>
+              <Link href="#how-it-works" className="block py-2 text-gray-600 hover:text-[#319795]">How it Works</Link>
+              <Link href="#pricing" className="block py-2 text-gray-600 hover:text-[#319795]">Pricing</Link>
+              <Link href="#testimonials" className="block py-2 text-gray-600 hover:text-[#319795]">Testimonials</Link>
+              <div className="pt-4 space-y-2">
+                <Button className="w-full bg-[#319795] hover:bg-[#2C7A7B]">Get Started</Button>
+                <Button variant="outline" className="w-full">Sign In</Button>
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="container px-4 md:px-6 mx-auto">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="text-xl font-bold text-[#319795]">StudPal</Link>
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="#features" className="text-gray-600 hover:text-[#319795] transition-colors">Features</Link>
+              <Link href="#how-it-works" className="text-gray-600 hover:text-[#319795] transition-colors">How it Works</Link>
+              <Link href="#pricing" className="text-gray-600 hover:text-[#319795] transition-colors">Pricing</Link>
+              <Link href="#testimonials" className="text-gray-600 hover:text-[#319795] transition-colors">Testimonials</Link>
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost">Sign In</Button>
+                <Button className="bg-[#319795] hover:bg-[#2C7A7B]">Get Started</Button>
+              </div>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 rounded-md text-gray-600 hover:text-[#319795] hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center overflow-hidden">
+      <section className="relative h-screen flex items-center overflow-hidden pt-16">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#319795]/5 to-transparent" />
         <div className="absolute inset-0 bg-grid-black/[0.02] bg-[size:60px_60px]" />
@@ -103,6 +184,7 @@ export default function LandingPage() {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
                 <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                  <Play className="w-4 h-4 mr-2" />
                   Watch Demo
                 </Button>
               </div>
@@ -219,7 +301,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-gray-50">
+      <section id="features" className="py-24 bg-gray-50">
         <div className="container px-4 md:px-6 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -240,38 +322,190 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Brain,
-                title: "AI-Powered Organization",
-                description: "Smart categorization and tagging of your study materials"
-              },
-              {
-                icon: Users,
-                title: "Collaborative Learning",
-                description: "Study groups and shared resources for better learning"
-              },
-              {
-                icon: Clock,
-                title: "Study Analytics",
-                description: "Track your progress and optimize your study habits"
-              }
-            ].map((feature, index) => (
+            {features.map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setActiveFeature(activeFeature === index ? null : index)}
               >
                 <div className="w-12 h-12 bg-[#319795]/10 rounded-xl flex items-center justify-center mb-6">
                   <feature.icon className="w-6 h-6 text-[#319795]" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
+                <AnimatePresence>
+                  {activeFeature === index && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 pt-4 border-t"
+                    >
+                      <p className="text-gray-600">{feature.details}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="mt-4 flex items-center text-[#319795]">
+                  {activeFeature === index ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-24 bg-white">
+        <div className="container px-4 md:px-6 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center max-w-3xl mx-auto mb-16"
+          >
+            <h2 className="text-4xl font-bold mb-6">
+              How StudPal
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#319795] to-[#2C7A7B]">
+                {" "}Works
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600">
+              Simple steps to transform your study experience
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: FileText,
+                title: "1. Add Your Materials",
+                description: "Import notes, PDFs, and web links into one secure location"
+              },
+              {
+                icon: Brain,
+                title: "2. Smart Organization",
+                description: "Our AI automatically categorizes and tags your content"
+              },
+              {
+                icon: Target,
+                title: "3. Study Smarter",
+                description: "Track progress and get personalized study recommendations"
+              }
+            ].map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="relative"
+              >
+                <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-[#319795]/10 rounded-xl flex items-center justify-center mb-6">
+                    <step.icon className="w-6 h-6 text-[#319795]" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                  <p className="text-gray-600">{step.description}</p>
+                </div>
+                {index < 2 && (
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                    <ArrowRight className="w-8 h-8 text-[#319795]" />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Security Section */}
+      <section className="py-24 bg-gray-50">
+        <div className="container px-4 md:px-6 mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <h2 className="text-4xl font-bold">
+                Your Data is
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#319795] to-[#2C7A7B]">
+                  {" "}Secure
+                </span>
+              </h2>
+              <p className="text-xl text-gray-600">
+                We take your privacy seriously. Your study materials are encrypted and protected with industry-standard security measures.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                {[
+                  { icon: Shield, title: "End-to-End Encryption" },
+                  { icon: Lock, title: "Secure Storage" },
+                  { icon: ZapIcon, title: "Fast Access" }
+                ].map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white p-4 rounded-xl shadow-sm"
+                  >
+                    <feature.icon className="w-6 h-6 text-[#319795] mb-2" />
+                    <div className="font-semibold">{feature.title}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#319795] to-[#2C7A7B] opacity-10" />
+                <div className="relative p-8">
+                  <div className="space-y-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                        <Lock className="w-6 h-6 text-[#319795]" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold">Secure Storage</h3>
+                        <p className="text-gray-600">Your data is encrypted and stored securely</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                        <Shield className="w-6 h-6 text-[#319795]" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold">Privacy First</h3>
+                        <p className="text-gray-600">Your information is never shared</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                        <ZapIcon className="w-6 h-6 text-[#319795]" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold">Fast Access</h3>
+                        <p className="text-gray-600">Quick and secure access to your materials</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
