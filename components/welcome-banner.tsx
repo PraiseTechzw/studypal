@@ -5,15 +5,19 @@ import { Bell, BrainCircuit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { useUser } from "@clerk/nextjs"
 
 interface WelcomeBannerProps {
   userName: string
   notificationCount?: number
 }
 
-export function WelcomeBanner({ userName, notificationCount = 0 }: WelcomeBannerProps) {
-  const { toast } = useToast()
 
+
+export function WelcomeBanner({ notificationCount = 0 }: WelcomeBannerProps) {
+  const { toast } = useToast()
+const { user } = useUser()
+  const userName = user?.firstName || "there"
   const getTimeOfDay = () => {
     const hour = new Date().getHours()
     if (hour < 12) return "morning"

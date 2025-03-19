@@ -22,10 +22,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { NotificationsPopover } from "@/components/notifications-popover"
+import { useAuth, useUser } from "@clerk/nextjs"
+import { SignedOut } from "@clerk/nextjs"
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
+  const { isSignedIn } = useAuth()
+  const { user } = useUser()
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -91,10 +95,10 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative overflow-hidden rounded-full">
                 <motion.img
-                  alt="User avatar"
+                  alt={user?.fullName || "User avatar"}
                   className="rounded-full"
                   height="32"
-                  src="/placeholder.svg"
+                  src={user?.imageUrl || "/placeholder.svg"}
                   style={{
                     aspectRatio: "32/32",
                     objectFit: "cover",
@@ -108,8 +112,8 @@ export function Header() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Alex Johnson</p>
-                  <p className="text-xs leading-none text-muted-foreground">alex.johnson@example.com</p>
+                  <p className="text-sm font-medium leading-none">{user?.fullName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -124,7 +128,7 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => toast.success("Successfully logged out")}>Log out</DropdownMenuItem>
+              <DropdownMenuItem ><SignedOut>log out</SignedOut></DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </motion.div>

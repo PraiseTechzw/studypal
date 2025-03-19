@@ -5,8 +5,12 @@ import { ArrowRight, BookOpen, Brain, CheckCircle, Laptop, Sparkles, Star, Zap, 
 import { Button } from "@/components/ui/button"
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { useRef, useState } from "react"
+import { useAuth, SignInButton } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
 
 export default function LandingPage() {
+  const { isSignedIn } = useAuth()
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeFeature, setActiveFeature] = useState<number | null>(null)
@@ -171,18 +175,19 @@ export default function LandingPage() {
                 </span>
                 <br />
                 Study Journey
-              </h1>
+                </h1>
 
               <p className="text-xl text-gray-600 max-w-xl">
                 Transform your academic success with StudPal's intelligent organization system. 
                 Streamline your study materials and boost productivity.
               </p>
-
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-[#319795] hover:bg-[#2C7A7B] text-lg px-8 py-6">
-                  Get Started Free
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                <SignInButton mode="modal">
+                  <Button size="lg" className="bg-[#319795] hover:bg-[#2C7A7B] text-lg px-8 py-6">
+                    Get Started Free
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </SignInButton>
                 <Button size="lg" variant="outline" className="text-lg px-8 py-6">
                   <Play className="w-4 h-4 mr-2" />
                   Watch Demo
@@ -236,11 +241,11 @@ export default function LandingPage() {
                       {/* Welcome Section */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-xl font-semibold">Welcome back, Alex!</h3>
+                          <h3 className="text-xl font-semibold">Welcome back, Praise!</h3>
                           <p className="text-gray-600">Here's your study overview</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-[#319795] flex items-center justify-center text-white">
-                          A
+                          P
                         </div>
                       </div>
 
@@ -286,10 +291,10 @@ export default function LandingPage() {
                             </motion.div>
                           ))}
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              </div>
+            </div>
+              </div>
+            </div>
 
                 {/* Decorative Elements */}
                 <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#319795] rounded-full opacity-10" />
@@ -334,7 +339,7 @@ export default function LandingPage() {
               >
                 <div className="w-12 h-12 bg-[#319795]/10 rounded-xl flex items-center justify-center mb-6">
                   <feature.icon className="w-6 h-6 text-[#319795]" />
-                </div>
+            </div>
                 <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
                 <AnimatePresence>
@@ -355,7 +360,7 @@ export default function LandingPage() {
                   ) : (
                     <ChevronDown className="w-4 h-4" />
                   )}
-                </div>
+          </div>
               </motion.div>
             ))}
           </div>
@@ -377,7 +382,7 @@ export default function LandingPage() {
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#319795] to-[#2C7A7B]">
                 {" "}Works
               </span>
-            </h2>
+                </h2>
             <p className="text-xl text-gray-600">
               Simple steps to transform your study experience
             </p>
@@ -412,14 +417,14 @@ export default function LandingPage() {
                 <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                   <div className="w-12 h-12 bg-[#319795]/10 rounded-xl flex items-center justify-center mb-6">
                     <step.icon className="w-6 h-6 text-[#319795]" />
-                  </div>
+              </div>
                   <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
                   <p className="text-gray-600">{step.description}</p>
-                </div>
+              </div>
                 {index < 2 && (
                   <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
                     <ArrowRight className="w-8 h-8 text-[#319795]" />
-                  </div>
+            </div>
                 )}
               </motion.div>
             ))}
@@ -491,13 +496,13 @@ export default function LandingPage() {
                       <div>
                         <h3 className="text-xl font-semibold">Privacy First</h3>
                         <p className="text-gray-600">Your information is never shared</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
+            </div>
+          </div>
+                <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
                         <ZapIcon className="w-6 h-6 text-[#319795]" />
                       </div>
-                      <div>
+                  <div>
                         <h3 className="text-xl font-semibold">Fast Access</h3>
                         <p className="text-gray-600">Quick and secure access to your materials</p>
                       </div>
@@ -525,12 +530,12 @@ export default function LandingPage() {
               Ready to transform your study journey?
             </h2>
             <p className="text-xl text-white/90 mb-8">
-              Join thousands of students already using StudPal to achieve their academic goals
-            </p>
+                Join thousands of students already using StudPal to achieve their academic goals
+              </p>
             <Button size="lg" className="bg-white text-[#319795] hover:bg-white/90 text-lg px-8 py-6">
               Get Started Free
               <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+              </Button>
           </motion.div>
         </div>
       </section>
