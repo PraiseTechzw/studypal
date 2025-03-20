@@ -22,13 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { NotificationsPopover } from "@/components/notifications-popover"
-import { useAuth, useUser } from "@clerk/nextjs"
+import {  SignOutButton, useUser } from "@clerk/nextjs"
 import { SignedOut } from "@clerk/nextjs"
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
-  const { isSignedIn } = useAuth()
   const { user } = useUser()
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -128,7 +127,7 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem ><SignedOut>log out</SignedOut></DropdownMenuItem>
+              <DropdownMenuItem ><SignOutButton /></DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </motion.div>

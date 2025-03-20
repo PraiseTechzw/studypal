@@ -5,12 +5,12 @@ import { ArrowRight, BookOpen, Brain, CheckCircle, Laptop, Sparkles, Star, Zap, 
 import { Button } from "@/components/ui/button"
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { useRef, useState } from "react"
-import { useAuth, SignInButton } from "@clerk/nextjs"
-import { useRouter } from "next/navigation"
+import { SignInButton } from "@clerk/nextjs"
+import { Logo } from "@/components/ui/logo"
+
 
 export default function LandingPage() {
-  const { isSignedIn } = useAuth()
-  const router = useRouter()
+
   const containerRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeFeature, setActiveFeature] = useState<number | null>(null)
@@ -55,7 +55,7 @@ export default function LandingPage() {
             className="fixed inset-y-0 right-0 w-64 bg-white shadow-xl z-50 p-6"
           >
             <div className="flex justify-between items-center mb-8">
-              <span className="text-xl font-bold text-[#319795]">StudPal</span>
+             <Logo />
               <button onClick={() => setIsMenuOpen(false)}>
                 <X className="w-6 h-6" />
               </button>
@@ -78,7 +78,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="text-xl font-bold text-[#319795]">StudPal</Link>
+            <Logo />
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
@@ -574,7 +574,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>© 2024 StudPal. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} StudPal. All rights reserved. Designed with ❤️ by <Link className="text-gray-400 hover:text-white transition-colors" href="https://praisetech-portfolio-fecn.vercel.app/">Praise Masunga</Link></p>
           </div>
         </div>
       </footer>
