@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress"
 
 export default function StudyAnalyticsPage() {
   const [timeRange, setTimeRange] = useState("week")
+  const [activeTab, setActiveTab] = useState("subjects")
 
   return (
     <div className="container p-4 sm:p-6 mx-auto">
@@ -182,7 +183,7 @@ export default function StudyAnalyticsPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="subjects">
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="subjects">By Subject</TabsTrigger>
             <TabsTrigger value="resources">By Resource Type</TabsTrigger>

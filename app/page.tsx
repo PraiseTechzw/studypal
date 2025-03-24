@@ -186,7 +186,7 @@ export default function LandingPage() {
                   <Button size="lg" className="bg-[#319795] hover:bg-[#2C7A7B] text-lg px-8 py-6">
                     Get Started Free
                     <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                </Button>
                 </SignInButton>
                 <Button size="lg" variant="outline" className="text-lg px-8 py-6">
                   <Play className="w-4 h-4 mr-2" />

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs";
-import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -13,19 +13,21 @@ export async function POST(req: Request) {
     const { title, description, type, content, fileUrl, linkUrl, tags } = body;
 
     // Get or create user profile
-    const userProfile = await prisma.userProfile.upsert({
+    let userProfile = await db.userProfile.findUnique({
       where: { clerkId: userId },
-      update: {},
-      create: {
-        clerkId: userId,
-        email: "", // You'll need to get this from Clerk
-        firstName: "", // You'll need to get this from Clerk
-        lastName: "", // You'll need to get this from Clerk
-      },
     });
 
-    // Create material with tags
-    const material = await prisma.studyMaterial.create({
+    if (!userProfile) {
+      userProfile = await db.userProfile.create({
+        data: {
+          clerkId: userId,
+          email: "", // This will be updated when user profile is created
+        },
+      });
+    }
+
+    // Create the study material
+    const material = await db.studyMaterial.create({
       data: {
         title,
         description,
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
         linkUrl,
         userId: userProfile.id,
         tags: {
-          connectOrCreate: tags.map((tag: string) => ({
+          connectOrCreate: tags?.map((tag: string) => ({
             where: { name: tag },
             create: { name: tag },
           })),
@@ -55,12 +57,12 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const userProfile = await prisma.userProfile.findUnique({
+    const userProfile = await db.userProfile.findUnique({
       where: { clerkId: userId },
     });
 
@@ -68,7 +70,7 @@ export async function GET(req: Request) {
       return new NextResponse("User not found", { status: 404 });
     }
 
-    const materials = await prisma.studyMaterial.findMany({
+    const materials = await db.studyMaterial.findMany({
       where: {
         userId: userProfile.id,
       },

@@ -22,13 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { NotificationsPopover } from "@/components/notifications-popover"
-import {  SignOutButton, useUser } from "@clerk/nextjs"
-import { SignedOut } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
-  const { user } = useUser()
+  const router = useRouter()
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -94,10 +93,10 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative overflow-hidden rounded-full">
                 <motion.img
-                  alt={user?.fullName || "User avatar"}
+                  alt="User avatar"
                   className="rounded-full"
                   height="32"
-                  src={user?.imageUrl || "/placeholder.svg"}
+                  src="/placeholder.svg"
                   style={{
                     aspectRatio: "32/32",
                     objectFit: "cover",
@@ -111,23 +110,30 @@ export function Header() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.fullName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</p>
+                  <p className="text-sm font-medium leading-none">Alex Johnson</p>
+                  <p className="text-xs leading-none text-muted-foreground">alex.johnson@example.com</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => toast.info("Profile page coming soon!")}>
+                <DropdownMenuItem onClick={() => router.push("/settings?tab=account")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info("Settings page coming soon!")}>
+                <DropdownMenuItem onClick={() => router.push("/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem ><SignOutButton /></DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  toast.success("Successfully logged out")
+                  // In a real app, this would handle logout logic
+                }}
+              >
+                Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </motion.div>

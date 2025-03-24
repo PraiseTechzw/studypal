@@ -1,0 +1,12 @@
+{
+  "project": "studpal",
+  "team": "studpal-team",
+  "prodUrl": "https://studpal.convex.cloud",
+  "functions": "convex/",
+  "authInfo": [
+    {
+      "domain": "https://studpal.clerk.accounts.dev",
+      "applicationID": "convex"
+    }
+  ]
+} 

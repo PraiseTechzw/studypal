@@ -19,18 +19,35 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export function AddMaterial() {
   const [step, setStep] = useState(1)
   const [materialType, setMaterialType] = useState<string>("")
+  const [title, setTitle] = useState("")
+  const [content, setContent] = useState("")
+  const [url, setUrl] = useState("")
+  const [subject, setSubject] = useState("")
+  const [priority, setPriority] = useState("")
   const [suggestedTags, setSuggestedTags] = useState(["Biology", "Chemistry", "Physics", "Lab Work", "Research"])
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
   // Listen for the custom event to open the dialog
   useEffect(() => {
-    const handleOpenDialog = () => setOpen(true)
+    const handleOpenDialog = (e: Event) => {
+      const customEvent = e as CustomEvent
+      if (customEvent.detail?.type) {
+        setMaterialType(customEvent.detail.type)
+        setStep(2)
+      }
+      setOpen(true)
+    }
+
     document.addEventListener("open-add-material-dialog", handleOpenDialog)
 
     return () => {
@@ -38,27 +55,90 @@ export function AddMaterial() {
     }
   }, [])
 
-  const handleSaveMaterial = () => {
-    // Simulate saving the material
-    toast({
-      title: "Material Added",
-      description: `Your ${materialType} has been successfully added`,
-      variant: "success",
-    })
+  // Generate tags based on content
+  const generateTags = async () => {
+    if (!content && !title) return
 
-    // Close the dialog and reset the form
-    setOpen(false)
+    setIsGeneratingTags(true)
+
+    try {
+      const response = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "extract-tags",
+          content: content || title,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data && Array.isArray(data.text)) {
+          // Filter out any empty tags and limit to 5
+          const newTags = data.text.filter((tag: string) => tag.trim().length > 0).slice(0, 5)
+
+          setSuggestedTags(newTags)
+        }
+      }
+    } catch (error) {
+      console.error("Error generating tags:", error)
+    } finally {
+      setIsGeneratingTags(false)
+    }
+  }
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }
+
+  const handleSaveMaterial = async () => {
+    if (!materialType || !title) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsLoading(true)
+
+    // Simulate saving the material
+    setTimeout(() => {
+      setIsLoading(false)
+
+      toast({
+        title: "Material Added",
+        description: `Your ${materialType} has been successfully added`,
+        variant: "success",
+      })
+
+      // Close the dialog and reset the form
+      setOpen(false)
+      resetForm()
+
+      // Navigate to the appropriate page based on material type
+      if (materialType === "note") {
+        router.push("/notes")
+      } else if (materialType === "pdf") {
+        router.push("/documents")
+      } else if (materialType === "link") {
+        router.push("/links")
+      }
+    }, 1500)
+  }
+
+  const resetForm = () => {
     setStep(1)
     setMaterialType("")
-
-    // Navigate to the appropriate page based on material type
-    if (materialType === "note") {
-      router.push("/notes")
-    } else if (materialType === "pdf") {
-      router.push("/documents")
-    } else if (materialType === "link") {
-      router.push("/links")
-    }
+    setTitle("")
+    setContent("")
+    setUrl("")
+    setSubject("")
+    setPriority("")
+    setSelectedTags([])
   }
 
   return (
@@ -123,13 +203,34 @@ export function AddMaterial() {
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" placeholder="Enter material title" />
+                <Input
+                  id="title"
+                  placeholder="Enter material title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={() => {
+                    if (title && !content && materialType === "note") {
+                      generateTags()
+                    }
+                  }}
+                />
               </div>
 
               {materialType === "note" && (
                 <div className="grid gap-2">
                   <Label htmlFor="content">Content</Label>
-                  <Textarea id="content" placeholder="Write your notes here..." className="h-32" />
+                  <Textarea
+                    id="content"
+                    placeholder="Write your notes here..."
+                    className="h-32"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    onBlur={() => {
+                      if (content) {
+                        generateTags()
+                      }
+                    }}
+                  />
                 </div>
               )}
 
@@ -147,13 +248,24 @@ export function AddMaterial() {
               {materialType === "link" && (
                 <div className="grid gap-2">
                   <Label htmlFor="url">URL</Label>
-                  <Input id="url" type="url" placeholder="https://" />
+                  <Input
+                    id="url"
+                    type="url"
+                    placeholder="https://"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    onBlur={() => {
+                      if (url) {
+                        generateTags()
+                      }
+                    }}
+                  />
                 </div>
               )}
 
               <div className="grid gap-2">
                 <Label>Subject</Label>
-                <Select>
+                <Select value={subject} onValueChange={setSubject}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select subject" />
                   </SelectTrigger>
@@ -168,7 +280,7 @@ export function AddMaterial() {
 
               <div className="grid gap-2">
                 <Label>Priority</Label>
-                <Select>
+                <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
@@ -181,10 +293,25 @@ export function AddMaterial() {
               </div>
 
               <div className="grid gap-2">
-                <Label>Suggested Tags</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Tags</Label>
+                  {isGeneratingTags && (
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      <span className="text-xs text-muted-foreground">Generating tags...</span>
+                    </div>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {suggestedTags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="cursor-pointer hover:bg-[#319795] hover:text-white">
+                    <Badge
+                      key={tag}
+                      variant={selectedTags.includes(tag) ? "default" : "secondary"}
+                      className={`cursor-pointer ${
+                        selectedTags.includes(tag) ? "bg-[#319795] hover:bg-[#2C7A7B]" : "hover:bg-[#319795]/20"
+                      }`}
+                      onClick={() => toggleTag(tag)}
+                    >
                       {tag}
                     </Badge>
                   ))}
@@ -196,8 +323,15 @@ export function AddMaterial() {
               <Button variant="outline" onClick={() => setStep(1)}>
                 Back
               </Button>
-              <Button className="bg-[#319795] hover:bg-[#2C7A7B]" onClick={handleSaveMaterial}>
-                Save Material
+              <Button className="bg-[#319795] hover:bg-[#2C7A7B]" onClick={handleSaveMaterial} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Material"
+                )}
               </Button>
             </div>
           </div>

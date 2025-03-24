@@ -1,42 +1,58 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Send, BrainCircuit, Sparkles, Lightbulb, BookOpen, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { useChat } from "ai/react"
+import { LoadingDots } from "@/components/ui/loading-dots"
 
 export default function AIAssistantPage() {
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "Hi there! I'm your StudPal AI Assistant. How can I help with your studies today?",
-    },
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [recentTopics, setRecentTopics] = useState([
+    "Cell Biology",
+    "Mitochondria",
+    "Krebs Cycle",
+    "Cellular Respiration",
   ])
-  const [inputValue, setInputValue] = useState("")
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return
+  // Use the AI SDK's useChat hook
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: "/api/ai/chat",
+    initialMessages: [
+      {
+        role: "assistant",
+        content: "Hi there! I'm your StudPal AI Assistant. How can I help with your studies today?",
+        id: "initial-message",
+      },
+    ],
+    onFinish: (message) => {
+      // Extract potential topics from the conversation
+      const newTopics = extractTopics(message.content)
+      if (newTopics.length > 0) {
+        setRecentTopics((prev) => {
+          const combined = [...newTopics, ...prev]
+          // Remove duplicates and keep only the first 5
+          return Array.from(new Set(combined)).slice(0, 5)
+        })
+      }
+    },
+  })
 
-    // Add user message
-    setMessages([...messages, { role: "user", content: inputValue }])
-
-    // Simulate AI response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "I've analyzed your question about cell biology. The mitochondria is indeed the powerhouse of the cell, responsible for generating most of the cell's supply of ATP through cellular respiration. Would you like me to explain more about its structure and function?",
-        },
-      ])
-    }, 1000)
-
-    setInputValue("")
+  // Extract potential topics from text
+  const extractTopics = (text: string): string[] => {
+    // This is a simple implementation - in a real app, you'd use NLP or the AI itself
+    const words = text.split(/\s+/)
+    return words.filter((word) => word.length > 5 && /^[A-Z]/.test(word)).slice(0, 3)
   }
+
+  // Scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   const suggestions = [
     "Explain the Krebs cycle in simple terms",
@@ -66,24 +82,35 @@ export default function AIAssistantPage() {
                       <span className="font-medium text-[#319795]">StudPal AI</span>
                     </div>
                   )}
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-start mb-4">
+                <div className="max-w-[80%] rounded-lg p-3 bg-white border shadow-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BrainCircuit className="h-4 w-4 text-[#319795]" />
+                    <span className="font-medium text-[#319795]">StudPal AI</span>
+                  </div>
+                  <LoadingDots color="text-[#319795]" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
-          <div className="flex gap-2">
+          <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              value={input}
+              onChange={handleInputChange}
               placeholder="Ask anything about your studies..."
               className="flex-1"
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
             />
-            <Button onClick={handleSendMessage} className="bg-[#319795] hover:bg-[#2C7A7B]">
+            <Button type="submit" disabled={isLoading || !input.trim()} className="bg-[#319795] hover:bg-[#2C7A7B]">
               <Send className="h-4 w-4" />
             </Button>
-          </div>
+          </form>
         </div>
 
         <div className="space-y-6">
@@ -98,7 +125,14 @@ export default function AIAssistantPage() {
                   key={index}
                   variant="outline"
                   className="w-full justify-start text-sm h-auto py-2 px-3"
-                  onClick={() => setInputValue(suggestion)}
+                  onClick={() => {
+                    handleInputChange({ target: { value: suggestion } } as any)
+                    // Submit after a short delay to allow the input to update
+                    setTimeout(() => {
+                      const form = document.querySelector("form")
+                      if (form) form.dispatchEvent(new Event("submit", { cancelable: true }))
+                    }, 100)
+                  }}
                 >
                   <Lightbulb className="h-3.5 w-3.5 mr-2 text-[#319795]" />
                   {suggestion}
@@ -123,14 +157,14 @@ export default function AIAssistantPage() {
                     <Sparkles className="h-4 w-4 mt-0.5 text-[#319795]" />
                     <div>
                       <p className="text-xs font-medium">Explain Concepts</p>
-                      <p className="text-xs text-gray-500">Get clear explanations on any topic</p>
+                      <p className="text-xs text-muted-foreground">Get clear explanations on any topic</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2 p-2 rounded-md bg-gray-50">
                     <BookOpen className="h-4 w-4 mt-0.5 text-[#319795]" />
                     <div>
                       <p className="text-xs font-medium">Answer Questions</p>
-                      <p className="text-xs text-gray-500">Get help with homework and assignments</p>
+                      <p className="text-xs text-muted-foreground">Get help with homework and assignments</p>
                     </div>
                   </div>
                 </TabsContent>
@@ -139,14 +173,14 @@ export default function AIAssistantPage() {
                     <FileText className="h-4 w-4 mt-0.5 text-[#319795]" />
                     <div>
                       <p className="text-xs font-medium">Generate Flashcards</p>
-                      <p className="text-xs text-gray-500">Create study materials automatically</p>
+                      <p className="text-xs text-muted-foreground">Create study materials automatically</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2 p-2 rounded-md bg-gray-50">
                     <Lightbulb className="h-4 w-4 mt-0.5 text-[#319795]" />
                     <div>
                       <p className="text-xs font-medium">Practice Questions</p>
-                      <p className="text-xs text-gray-500">Generate quizzes to test your knowledge</p>
+                      <p className="text-xs text-muted-foreground">Generate quizzes to test your knowledge</p>
                     </div>
                   </div>
                 </TabsContent>
@@ -155,14 +189,14 @@ export default function AIAssistantPage() {
                     <Sparkles className="h-4 w-4 mt-0.5 text-[#319795]" />
                     <div>
                       <p className="text-xs font-medium">Summarize Content</p>
-                      <p className="text-xs text-gray-500">Get key points from your materials</p>
+                      <p className="text-xs text-muted-foreground">Get key points from your materials</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2 p-2 rounded-md bg-gray-50">
                     <BrainCircuit className="h-4 w-4 mt-0.5 text-[#319795]" />
                     <div>
                       <p className="text-xs font-medium">Analyze Papers</p>
-                      <p className="text-xs text-gray-500">Get insights from research papers</p>
+                      <p className="text-xs text-muted-foreground">Get insights from research papers</p>
                     </div>
                   </div>
                 </TabsContent>
@@ -176,10 +210,11 @@ export default function AIAssistantPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">Cell Biology</Badge>
-                <Badge variant="secondary">Mitochondria</Badge>
-                <Badge variant="secondary">Krebs Cycle</Badge>
-                <Badge variant="secondary">Cellular Respiration</Badge>
+                {recentTopics.map((topic, index) => (
+                  <Badge key={index} variant="secondary">
+                    {topic}
+                  </Badge>
+                ))}
               </div>
             </CardContent>
           </Card>

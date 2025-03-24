@@ -38,15 +38,6 @@ export function Sidebar() {
     setIsMounted(true)
   }, [])
 
-  // Update document body class when sidebar is collapsed
-  useEffect(() => {
-    if (isCollapsed) {
-      document.body.classList.add('sidebar-collapsed')
-    } else {
-      document.body.classList.remove('sidebar-collapsed')
-    }
-  }, [isCollapsed])
-
   const mainNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Text Notes", href: "/dashboard/notes", icon: FileText },
@@ -63,10 +54,12 @@ export function Sidebar() {
     { name: "Resource Exchange", href: "/dashboard/resource-exchange", icon: Store },
   ]
 
+  // Find the productivityTools array and add the exam generator as a new item
   const productivityTools = [
     { name: "Study Timer", href: "/dashboard/study-timer", icon: Clock, isNew: true },
     { name: "Analytics", href: "/dashboard/study-analytics", icon: BarChart3 },
     { name: "Collaborative Editor", href: "/dashboard/collaborative-editor", icon: FileEdit, isNew: true },
+    { name: "Exam Generator", href: "/dashboard/exam-generator", icon: BookOpen, isNew: true },
   ]
 
   const settings = [

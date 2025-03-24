@@ -1,23 +1,21 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Bell, BrainCircuit } from "lucide-react"
+import { Bell, BrainCircuit, BookOpen, Clock, Target, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { useState } from "react"
 
-interface WelcomeBannerProps {
-  userName: string
-  notificationCount?: number
-}
-
-
-
-export function WelcomeBanner({ notificationCount = 0 }: WelcomeBannerProps) {
+export function WelcomeBanner() {
+  const { user } = useUser()
+  const stats = useQuery(api.analytics.getStats)
+  const [notificationCount, setNotificationCount] = useState(0)
   const { toast } = useToast()
-const { user } = useUser()
-  const userName = user?.firstName || "there"
+
   const getTimeOfDay = () => {
     const hour = new Date().getHours()
     if (hour < 12) return "morning"
@@ -59,9 +57,11 @@ const { user } = useUser()
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1">
             <CardTitle className="text-2xl font-bold text-white">
-              Good {getTimeOfDay()}, {userName}! 👋
+              Good {getTimeOfDay()}, {user?.firstName || "Student"}! 👋
             </CardTitle>
-            <CardDescription className="text-gray-200">Ready to organize your study materials?</CardDescription>
+            <CardDescription className="text-gray-200">
+              Here's your study overview for today
+            </CardDescription>
           </div>
           <div className="flex gap-2">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -98,13 +98,29 @@ const { user } = useUser()
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { title: "Total Materials", value: 24 },
-            { title: "Due This Week", value: 5 },
-            { title: "Shared With You", value: 3 },
-            { title: "AI Generations", value: 12 },
-          ].map((stat, index) => (
+            {
+              title: "Total Materials",
+              value: stats?.totalMaterials || 0,
+              icon: BookOpen,
+            },
+            {
+              title: "Study Time",
+              value: `${Math.round((stats?.totalStudyTime || 0) / 60)}h`,
+              icon: Clock,
+            },
+            {
+              title: "Focus Score",
+              value: `${stats?.focusScore || 0}%`,
+              icon: Target,
+            },
+            {
+              title: "Study Groups",
+              value: stats?.studyGroups || 0,
+              icon: Users,
+            },
+          ].map((stat) => (
             <motion.div
               key={stat.title}
               className="bg-white/10 rounded-lg p-4"
@@ -113,15 +129,22 @@ const { user } = useUser()
               transition={{ delay: 0.1 * index, duration: 0.3 }}
               whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
             >
-              <p className="text-gray-200">{stat.title}</p>
-              <motion.p
-                className="text-2xl font-bold text-white"
-                initial={{ scale: 0.5 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2 + 0.1 * index, type: "spring", stiffness: 300 }}
-              >
-                {stat.value}
-              </motion.p>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <stat.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-200">{stat.title}</p>
+                  <motion.p
+                    className="text-2xl font-bold text-white"
+                    initial={{ scale: 0.5 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2 + 0.1 * index, type: "spring", stiffness: 300 }}
+                  >
+                    {stat.value}
+                  </motion.p>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>

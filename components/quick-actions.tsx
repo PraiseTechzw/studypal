@@ -1,6 +1,6 @@
 "use client"
 
-import { BrainCircuit, FileText, BookOpen, Globe, MessageSquare } from "lucide-react"
+import { BrainCircuit, FileText, BookOpen, Globe } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 
@@ -55,12 +55,12 @@ export function QuickActions() {
       action: "save-link",
     },
     {
-      title: "Join Study Group",
-      description: "Collaborate with peers",
-      icon: MessageSquare,
+      title: "Generate Exam",
+      description: "Create practice tests",
+      icon: BookOpen,
       color: "bg-green-100",
       textColor: "text-green-600",
-      action: "/groups",
+      action: "/exam-generator",
     },
   ]
 
